@@ -21,28 +21,66 @@ weighted by the other function around the origin
 — the two functions being traversed in opposite directions to each other (necessary to guarantee commutativity)
 
 
-
-In image processing, a kernel, convolution matrix, or mask is a small matrix used for blurring, image sharpening, embossing, edge detection, and others. 
-All this is accomplished by doing a convolution between the kernel and the image.
-
 """
 
 class Convolution:
     """
-    Cette classe va prendre en entree des parametres et retourner la feature map 
+    In image processing, a kernel, convolution matrix, or mask is a small matrix used for blurring, image sharpening, embossing, edge detection, and others. 
+    All this is accomplished by doing a convolution between the kernel and the image.
 
     """
     
-    def check_dim(self, x_in, kernel): 
-        if len(x_in) < len(kernel): 
+    def __init__(self):
+        self.stride = None
+        self.x_in = None
+        self.kernel = None
+        self.mode = None
+    
+    def check_dim(self):
+        if self.x_in is None or self.kernel is None:
+            raise ValueError('The dimension of the matrix or the kernel is not defined')
+        elif len(self.x_in.shape) != 2 or len(self.kernel.shape) != 2:
+            raise ValueError('Matrix or kernel need to be in 2D array')
+    
+    def validate_dim(self): 
+        if len(self.x_in) < len(self.kernel): 
             raise ValueError('The size of the input matrix must be greater than the size of the convolution kernel')
         
     def shape_conv(self):
-        h_out = (self.x_in.shape[0] - self.kernel.shape[0] + 1) / self.stride
-        w_out = (self.x_in.shape[1] - self.kernel.shape[1] + 1) / self.stride
+        if self.mode == 'valid':
+            h_out = (self.x_in.shape[0] - self.kernel.shape[0] + 1) // self.stride
+            w_out = (self.x_in.shape[1] - self.kernel.shape[1] + 1) // self.stride
+            return (int(h_out), int(w_out))
+        elif self.mode == 'full':
+            h_out = ((self.x_in.shape[0] + (2*self.padding) - self.kernel.shape[0]) // self.stride) + 1
+            w_out = ((self.x_in.shape[1] + (2*self.padding) - self.kernel.shape[1]) // self.stride) + 1
+            return (int(h_out), int(w_out))
+        elif self.mode == 'same':
+            return 0
+        else:
+            raise ValueError('Unknown mode')
+    
+    def valid_conv(self):
+        h_out, w_out = self.shape_conv()
+        conv_matrix = np.zeros((h_out, w_out))
+        n_i, n_j = self.kernel.shape[0], self.kernel.shape[1]
+        s_i = 0  # Initialize row stride offset
+        for i in range(h_out):
+            s_j = 0  # Initialize column stride offset
+            for j in range(w_out):
+                sub_matrix = self.x_in[i+s_i:i+s_i+n_i, j+s_j:+j+s_j+n_j]  # Extract sub matrix
+                conv_matrix[i, j] = np.sum(sub_matrix * self.kernel)  # Compute convolution
+                s_j += self.stride - 1  # Increment column stride offset
+            s_i += self.stride - 1  # Increment row stride offset
+
         
-        return (int(h_out), int(w_out))
-            
+        return conv_matrix
+    
+    def full_conv(self):
+        h_out, w_out = self.shape_conv()
+        conv_matrix = np.zeros((h_out, w_out))
+        return conv_matrix
+        
     
     def fit(self, x_in, kernel, stride = 1, padding = 0, mode = 'valid'):
         self.x_in = x_in
@@ -50,35 +88,26 @@ class Convolution:
         self.stride = stride
         self.padding = padding
         self.mode = mode
-        i = 0
-        j = 0
         
         try:
-            self.check_dim(x_in, kernel)
+            self.check_dim()
+            self.validate_dim()
             
         except Exception as e:
             print(e)
             return None
         
-          
         if mode == 'valid':
-            h_out, w_out = self.shape_conv()
-            conv_matrix = np.zeros((h_out, w_out))
-            n_i, n_j = self.kernel.shape[0], self.kernel.shape[1]
-            s_i = 0  # Initialize row stride offset
-            for i in range(h_out):
-                s_j = 0  # Initialize column stride offset
-                for j in range(w_out):
-                    sub_matrix = self.x_in[i+s_i:i+s_i+n_i, j+s_j:+j+s_j+n_j]  # Extract sub matrix
-                    conv_matrix[i, j] = np.sum(sub_matrix * self.kernel)  # Compute convolution
-                    s_j += stride - 1  # Increment column stride offset
-                s_i += stride - 1  # Increment row stride offset
-
-            
-            return conv_matrix
+            return self.valid_conv()
         
         elif mode == 'full':
+            return self.full_conv()
+        
+        elif mode == 'same':
             return 0
+        
+        else:
+            raise ValueError('Invalid convolution mode, plzz read the document of the method')
     
                 
                     
@@ -106,7 +135,7 @@ k = np.diag(np.diag(k))
 print(np.sum(np.multiply(C[0:3, 0:3], k)))
 
 X = Convolution()
-score = X.fit(C, k, stride = 1)
+score = X.fit(C, k, mode = 'valid')
 print(score)
         
         
