@@ -79,7 +79,21 @@ class Convolution:
     def full_conv(self):
         h_out, w_out = self.shape_conv()
         conv_matrix = np.zeros((h_out, w_out))
+    
+        # Adjust padding to match kernel size
+        padding_i = (self.kernel.shape[0] - 1) // 2
+        padding_j = (self.kernel.shape[1] - 1) // 2
+        padded_x_in = np.pad(self.x_in, ((padding_i, padding_i), (padding_j, padding_j)), mode='constant')
+    
+        for i in range(h_out):
+            for j in range(w_out):
+                # Extract sub matrix with adjusted padding
+                sub_matrix = padded_x_in[i:i+self.kernel.shape[0], j:j+self.kernel.shape[1]]
+                # Perform element-wise multiplication and sum
+                conv_matrix[i, j] = np.sum(sub_matrix * self.kernel)
+    
         return conv_matrix
+
         
     
     def fit(self, x_in, kernel, stride = 1, padding = 0, mode = 'valid'):
@@ -102,9 +116,6 @@ class Convolution:
         
         elif mode == 'full':
             return self.full_conv()
-        
-        elif mode == 'same':
-            return 0
         
         else:
             raise ValueError('Invalid convolution mode, plzz read the document of the method')
@@ -135,9 +146,12 @@ k = np.diag(np.diag(k))
 print(np.sum(np.multiply(C[0:3, 0:3], k)))
 
 X = Convolution()
-score = X.fit(C, k, mode = 'valid')
+score = X.fit(C, k, mode = 'full', padding=1)
 print(score)
         
+from scipy import signal
+S = signal.convolve2d(C, k)
+print(S)
         
         
         
