@@ -35,6 +35,12 @@ The dataset attributes include:
 - `Urinary System Cancer` – Cancer that forms in the organs of the body that produce and discharge urine, including the kidneys, ureters, bladder, and urethra, expressed as a rate per 100,000.
 - `All Cancer` – All cancers combined, including, but not limited to, colorectal cancer, lung cancer, breast cancer, prostate cancer, and urinary system cancer, expressed as a rate per 100,000.
 
+**Install**
+
+```
+pip install geopandas # Librairie to manipulate and visualize geojson file
+```
+
 ## The Work
 We first visualize the .csv data to understand its size, check for missing or outlier values, and determine if it follows a normal distribution or other. We notice that the dataset is relatively small (24 rows, 10 columns) and does not contain significant outliers, which is beneficial.
 
@@ -53,3 +59,19 @@ Here is the map of Lake County:
 ![Lake County map](saves/images/Lake%20county.png)
 
 This enhanced English version enriches the context and makes the text more pertinent and informative, providing a clearer understanding of the objectives and methodology of the unsupervised learning project focused on cancer data in Lake County, Illinois.
+
+We applied the K-Means algorithm to group different cancer regions within the county. This method allowed us to cluster various cancer statistics based on the information provided by the dataset.
+
+These clusters were then interpreted through our analyses. In our study, we determined that the optimal number of clusters is \(n = 3\), indicating the presence of three distinct areas in terms of cancer prevalence. A deeper analysis allowed us to understand the significance of each cluster: one cluster represents an area less affected by cancer, with low propagation. The second cluster corresponds to an area with a significant presence of cancer, which we could categorize as an "orange" zone. The last area, identified as "red," indicates a region heavily impacted by cancer.
+
+![Cancer Propagation](saves/images/cancer%20visualisation.png)
+
+To further our understanding of the data, we also performed a Principal Component Analysis (PCA) to reduce the dataset's dimensionality. Although the dataset was relatively small, this technique enabled us to condense information and reveal that five principal components explain 95% of the data variance, highlighting the most significant elements of our study.
+
+Additionally, we compared the results with those obtained by applying t-SNE, another dimensionality reduction technique, to better visualize the clusters in a reduced space.
+
+The 3D visualization, made possible by PCA, offers a unique perspective on the spatial distribution of cancer clusters, allowing for a more intuitive understanding of the data.
+
+![3D PCA Visualization](saves/images/3d.png)
+
+This in-depth analysis, combining K-Means, PCA, and 3D visualization, provides a clear overview of cancer prevalence areas in the county. It underscores the importance of using advanced unsupervised learning techniques and data visualization to identify and understand complex patterns within public health data.
